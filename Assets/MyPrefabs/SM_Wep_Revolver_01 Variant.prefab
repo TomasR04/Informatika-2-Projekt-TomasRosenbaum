@@ -168,6 +168,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1111015175407080, guid: 151fe3144103e1440900697f4b29c68e, type: 3}
+      propertyPath: m_TagString
+      value: Item
+      objectReference: {fileID: 0}
     - target: {fileID: 4030818715711028, guid: 151fe3144103e1440900697f4b29c68e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 499.91843
@@ -254,10 +258,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Gun
   size: 5
   value: 5
-  range: 20
   itemType: 2
   handPosition: {x: 0.092, y: 0.032, z: -0.0477}
   handRotation: {x: 180, y: -111.395, z: 90}
   Name: Revolver
   magazine: {fileID: 1946636383989267470}
+  range: 30
+  fireDelay: 0.5
   muzzleFlash: {fileID: 3241033634693082238}

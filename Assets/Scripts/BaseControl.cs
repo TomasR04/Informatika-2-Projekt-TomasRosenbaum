@@ -6,6 +6,8 @@ public class BaseControl : MonoBehaviour
 {
     public int baseRadius = 50;
     public GlobalControl globalControl;
+    public int money = 0;
+    public List<GameObject> characters;
 
     void Start()
     {
@@ -17,10 +19,7 @@ public class BaseControl : MonoBehaviour
         globalControl.treeSpawned += OnTreeSpawned;
     }
     // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    
 
     public void OnTreeSpawned()
     {
@@ -41,6 +40,7 @@ public class BaseControl : MonoBehaviour
         {
             Destroy(tree);
         }
+
 
     }
 }

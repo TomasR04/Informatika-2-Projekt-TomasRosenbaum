@@ -18,6 +18,21 @@ public class CharacterInventory : MonoBehaviour
     public void AddItem(Item item)
     {
         items.Add(item);
+        item.gameObject.GetComponent<Collider>().enabled = false;
+        item.gameObject.transform.SetParent(this.transform);
+        item.GetComponent<Renderer>().enabled = false;
+        Transform[] children = item.GetComponentsInChildren<Transform>();
+        foreach (Transform child in children)
+        {
+            if (child != item.transform)
+            {
+                Renderer childRenderer = child.GetComponent<Renderer>();
+                if (childRenderer != null)
+                {
+                    childRenderer.enabled = false;
+                }
+            }
+        }
     }
     public void RemoveItem(Item item)
     {
@@ -69,6 +84,7 @@ public class CharacterInventory : MonoBehaviour
             {
                 gun.ReloadGun(mag);
                 items.Remove(mag);
+                Destroy(mag.gameObject);
                 break;
             }
         }

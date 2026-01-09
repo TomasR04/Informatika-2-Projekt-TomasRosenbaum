@@ -10,8 +10,8 @@ namespace Assets.Scripts
 {
     internal class Magazine : Item
     {
-        public int capacity = 10;
-        public int currentAmmo = 0;
+        public int capacity;
+        public int currentAmmo;
         public MagazineType magazineType;
         public bool Reload()
         {
@@ -50,5 +50,14 @@ namespace Assets.Scripts
             shotgun,
             revolver
         }
+        private void Start()
+        {
+            currentAmmo = capacity;
+        }
+        private void Awake()
+        {
+            currentAmmo = capacity;
+        }
+
     }
 }

@@ -27,10 +27,14 @@ public class PlayableControler : MonoBehaviour
     public bool canShoot = true;
     bool isReloading = false;
     public float stopRange = 5f;
+    public float sightRange = 100f;
+    public float detectRadius = 10f;
 
     Vector3 destinationPoint;
     public List<GameObject> visibleTargets = new List<GameObject>();
     public GameObject currentTarget;
+
+    bool selected = false;
 
 
 
@@ -53,7 +57,7 @@ public class PlayableControler : MonoBehaviour
             aimingText = charUI.transform.Find("Aim Text").GetComponent<TMPro.TextMeshProUGUI>();
             medicineText = charUI.transform.Find("Med Text").GetComponent<TMPro.TextMeshProUGUI>();
         }*/
-
+        CollectItems();
 
     }
 
@@ -77,6 +81,7 @@ public class PlayableControler : MonoBehaviour
             aimingText = charUI.transform.Find("Aim Text").GetComponent<TMPro.TextMeshProUGUI>();
             medicineText = charUI.transform.Find("Med Text").GetComponent<TMPro.TextMeshProUGUI>();
         }
+        CollectItems();
     }
     void OnRealodingDone()
     {
@@ -98,12 +103,12 @@ public class PlayableControler : MonoBehaviour
             animator.SetBool("HasShortGun", false);
 
         }
-        
-        
+
+
     }
     void OnReloading()
     {
-        
+
         isReloading = true;
         animator.Play("Reloading");
         //animator.SetBool("Aim", false);
@@ -116,17 +121,17 @@ public class PlayableControler : MonoBehaviour
         {
             return;
         }
-        if (destinationPoint!=null)
+        if (destinationPoint != null)
         {
             CheckArrival();
         }
         ScanForTargets();
-        if (currentTarget != null && inventory.equipedItem!=null)
+        if (currentTarget != null && inventory.equipedItem != null)
         {
             Gun gun = (Gun)inventory.equipedItem;
-            if (canShoot && Vector3.Distance(transform.position, currentTarget.transform.position)<=gun.range)
+            if (canShoot && Vector3.Distance(transform.position, currentTarget.transform.position) <= gun.range)
             {
-                
+
                 Vector3 directionToTarget = currentTarget.transform.position - transform.position;
                 directionToTarget.y = 0;
                 Quaternion lookRotation = Quaternion.LookRotation(directionToTarget);
@@ -138,19 +143,19 @@ public class PlayableControler : MonoBehaviour
                     animator.SetBool("Aim", true);
                     OnAimed();
                 }
-                
+
                 if (inventory.equipedItem.itemType == Item.ItemType.shortWeapon)
                 {
                     //Debug.Log("Using short weapon");
                     animator.SetBool("HasShortGun", true);
                     animator.SetBool("HasLongGun", false);
-                    
+
                 }
                 else if (inventory.equipedItem.itemType == Item.ItemType.longWeapon)
                 {
                     animator.SetBool("HasLongGun", true);
                     animator.SetBool("HasShortGun", false);
-                    
+
                 }
             }
             else
@@ -171,12 +176,12 @@ public class PlayableControler : MonoBehaviour
     void ScanForTargets()
     {
         visibleTargets.Clear();
-        for (int i = -90; i <= 90; i ++)
+        for (int i = -90; i <= 90; i++)
         {
             Vector3 dir = Quaternion.Euler(0, i, 0) * transform.forward;
             Ray ray = new Ray(transform.position + Vector3.up, dir);
             RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, 10f))
+            if (Physics.Raycast(ray, out hit, sightRange))
             {
                 GameObject hitObject = hit.collider.gameObject;
                 if (hitObject.CompareTag("Enemy"))
@@ -186,6 +191,18 @@ public class PlayableControler : MonoBehaviour
                     {
                         visibleTargets.Add(hitObject);
                     }
+                }
+            }
+        }
+
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, detectRadius);
+        foreach (var hitCollider in hitColliders)
+        {
+            if (hitCollider.CompareTag("Enemy"))
+            {
+                if (!visibleTargets.Contains(hitCollider.gameObject))
+                {
+                    visibleTargets.Add(hitCollider.gameObject);
                 }
             }
         }
@@ -230,40 +247,58 @@ public class PlayableControler : MonoBehaviour
         medicineText.text = "Medicine: " + medicine.ToString();
 
         charUI.SetActive(true);
+        selected = true;
 
     }
     public void OnShotsFired()
     {
         ZombieControler zombie = currentTarget.GetComponent<ZombieControler>();
+        
         float chanceToHit = aiming - Vector3.Distance(transform.position, currentTarget.transform.position);
         float roll = Random.Range(0f, 50f);
         float result = chanceToHit + roll;
-        Debug.Log("-----------------------------");
-        Debug.Log("Šance: " +chanceToHit);
-        Debug.Log("Hod: " + roll);
-        Debug.Log("Výsledek: " + result);
+
         if (result > 50)
         {
-            Debug.Log("Critical Hit!");
+
             zombie.Die();
             visibleTargets.Clear();
             currentTarget = null;
             return;
         }
-        else if (result > 20)
+        else if (result > 10)
         {
-            Debug.Log("Hit the target!");
+
             zombie.ReciveHit();
         }
-        else
-        {
-            Debug.Log("Missed the shot!");
-        }
+        
     }
+    public void ReciveHit()
+    {
+        health -= 30;
+        if (selected)
+        {
+            Selected();
+        }
+        if (health <= 0)
+        {
+            Die();
+        }
 
+    }
+    public void Die()
+    {
+        gameObject.tag = "Eliminated";
+        animator.SetTrigger("Die");
+        GetComponent<Collider>().enabled = false;
+        agent.isStopped = true;
+        
+        this.enabled = false;
+    }
 
     public void Deselected()
     {
+        selected = false;
         charUI.SetActive(false);
     }
     public void MoveTo(Vector3 destination)
@@ -272,5 +307,20 @@ public class PlayableControler : MonoBehaviour
         agent.SetDestination(destinationPoint);
         animator.SetBool("Walk", true);
     }
-    
+
+    void CollectItems()
+    {       
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, 2f);
+        foreach (var hitCollider in hitColliders)
+        {
+            Item item = hitCollider.GetComponent<Item>();
+            if (item != null)
+            {
+                Transform parent = hitCollider.transform.parent;
+                if (parent == null) { 
+                    inventory.AddItem(item);                   
+                }
+            }
+        }
+    }
 }

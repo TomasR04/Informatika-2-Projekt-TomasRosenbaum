@@ -91,6 +91,8 @@ public class Player : MonoBehaviour
 
     }
 
+    
+
     void OnRightClick(InputValue value)
     {
         if (value.isPressed && selectedObject != null)

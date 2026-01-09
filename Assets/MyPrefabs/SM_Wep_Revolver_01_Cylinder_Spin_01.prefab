@@ -368,9 +368,10 @@ GameObject:
   - component: {fileID: 834786249724349432}
   - component: {fileID: 843364145325587322}
   - component: {fileID: 6912905537421540011}
+  - component: {fileID: -7213672346206437506}
   m_Layer: 0
   m_Name: SM_Wep_Revolver_01_Cylinder_Spin_01
-  m_TagString: Untagged
+  m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -466,13 +467,35 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Magazine
   size: 1
   value: 5
-  range: 10
   itemType: 4
   handPosition: {x: 0, y: 0, z: 0}
   handRotation: {x: 0, y: 0, z: 0}
   capacity: 6
   currentAmmo: 6
   magazineType: 3
+--- !u!136 &-7213672346206437506
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 857233760733306392}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.055209957
+  m_Height: 0.055424757
+  m_Direction: 1
+  m_Center: {x: -9.313226e-10, y: -0.000000023283064, z: 0.024933502}
 --- !u!1 &857654141883193488
 GameObject:
   m_ObjectHideFlags: 0

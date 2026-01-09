@@ -12,8 +12,9 @@ namespace Assets.Scripts
         //public ItemType Type;
         public string Name;
         public Magazine magazine;
+        public float range = 10f;
 
-        float fireDelay = 1f;
+        public float fireDelay = 1f;
         float nextFireTime = 0f;
 
         public ParticleSystem muzzleFlash;
@@ -43,15 +44,14 @@ namespace Assets.Scripts
             
             muzzleFlash.Stop();
         }
-        private void Update()
-        {
-           
-        }
+        
 
         public void ReloadGun(Magazine newMagazine)
         {
-            magazine = newMagazine;
-            
+            magazine.currentAmmo = newMagazine.currentAmmo;
+
+
+
         }
     }
 }

@@ -1,7 +1,10 @@
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using TMPro;
+using Unity.AI.Navigation;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class GlobalControl : MonoBehaviour
 {
@@ -10,18 +13,61 @@ public class GlobalControl : MonoBehaviour
     public Terrain terrain;
     public int treeSpacing = 2;
     public Action treeSpawned;
+    public Action nextWave;
+    public int currentWave = 0;
+    public TextMeshProUGUI zombieCountUI;
+    public int spawnedZombies = 0;
+    public NavMeshSurface navMeshSurface;
+    public bool ongoingWave = false;
+    public GameObject nextWaveButton;
+    public BaseControl baseControl;
+    public GameObject traderUI;
+    public 
+
     void Start()
     {
+        //navMeshSurface = GameObject.Find("NavMesh Surface").GetComponent<NavMeshSurface>();
         SpawnTrees();
         GameObject.Find("CharacterUI").SetActive(false);
     }
-
-    // Update is called once per frame
-    void Update()
+    public void AddZombies(int amount)
     {
-        
+        spawnedZombies += amount;
+        zombieCountUI.text = $"Zombies: {spawnedZombies}";
+
+    }
+    public void RemoveZombies(int amount)
+    {
+        spawnedZombies -= amount;
+        if (spawnedZombies < 0) spawnedZombies = 0;
+        zombieCountUI.text = $"Zombies: {spawnedZombies}";
+        if (spawnedZombies<=0)
+        {
+            WaveEnd();
+        }
+    }
+    void WaveEnd()
+    {
+        ongoingWave = false;
+        //nextWaveButton.SetActive(true);
+        baseControl.money += currentWave * 100;
+        ShowTrader();
     }
 
+    void ShowTrader()
+    {
+        traderUI.SetActive(true);
+    }
+
+
+    public void OnNextWave()
+    {
+        currentWave++;
+        spawnedZombies = 0;
+        nextWave?.Invoke();
+        ongoingWave = true;
+        nextWaveButton.SetActive(false);
+    }
     void SpawnTrees()
     {
         int count = 0;
@@ -71,5 +117,7 @@ public class GlobalControl : MonoBehaviour
 
         }
         treeSpawned?.Invoke();
+        navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+        navMeshSurface.BuildNavMesh();
     }
 }
