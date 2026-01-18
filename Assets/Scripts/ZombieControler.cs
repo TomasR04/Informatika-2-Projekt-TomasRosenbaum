@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -30,7 +31,7 @@ public class ZombieControler : MonoBehaviour
             Die();
         }
     }
-    public void Die()
+    /*public void Die()
     {
         isDead = true;
         tag = "Eliminated";
@@ -45,6 +46,28 @@ public class ZombieControler : MonoBehaviour
         this.enabled = false;
 
 
+    }*/
+    public void Die()
+    {
+        if (isDead) return;
+        isDead = true;
+
+        gameObject.tag = "Eliminated";
+        StartCoroutine(DieWhenOnNavMesh());
+    }
+
+    private IEnumerator DieWhenOnNavMesh()
+    {
+        while (!agent.isOnNavMesh)
+            yield return null;
+
+        agent.isStopped = true;
+        animator.SetTrigger("Die");
+
+        agent.enabled = false;
+        GetComponent<Collider>().enabled = false;
+        Died?.Invoke(this);
+        this.enabled = false;
     }
     void GetTargets()
     {

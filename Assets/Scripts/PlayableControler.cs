@@ -36,6 +36,9 @@ public class PlayableControler : MonoBehaviour
 
     bool selected = false;
 
+    public BaseControl baseControl;
+    public GlobalControl globalControl;
+
 
 
     void Start()
@@ -82,7 +85,16 @@ public class PlayableControler : MonoBehaviour
             medicineText = charUI.transform.Find("Med Text").GetComponent<TMPro.TextMeshProUGUI>();
         }
         CollectItems();
+        if (baseControl == null)
+        {
+            baseControl = GameObject.Find("Base").GetComponent<BaseControl>();
+        }
+        if (globalControl == null)
+        {
+            globalControl = GameObject.Find("Global Control").GetComponent<GlobalControl>();
+        }
     }
+
     void OnRealodingDone()
     {
         visibleTargets.Clear();
@@ -202,10 +214,12 @@ public class PlayableControler : MonoBehaviour
             {
                 if (!visibleTargets.Contains(hitCollider.gameObject))
                 {
-                    visibleTargets.Add(hitCollider.gameObject);
+                    if (HasLighOfSightTo(hitCollider.gameObject))
+                        visibleTargets.Add(hitCollider.gameObject);
                 }
             }
         }
+        
         if (visibleTargets.Count > 0)
         {
             foreach (GameObject target in visibleTargets)
@@ -230,6 +244,21 @@ public class PlayableControler : MonoBehaviour
             currentTarget = null;
             animator.SetBool("Aim", false);
         }
+    }
+    bool HasLighOfSightTo(GameObject target)
+    {
+        Vector3 directionToTarget = target.transform.position - transform.position;
+        directionToTarget.y += 1.5f; // Adjust for height if necessary
+        Ray ray = new Ray(transform.position + Vector3.up, directionToTarget.normalized);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, detectRadius))
+        {
+            if (hit.collider.gameObject == target)
+            {
+                return true; // Clear line of sight
+            }
+        }
+        return false; // Obstructed line of sight
     }
     public void OnAimed()
     {
@@ -323,4 +352,40 @@ public class PlayableControler : MonoBehaviour
             }
         }
     }
+
+    public void Heal(Item medkit)
+    {
+        if (medkit == null || medkit.itemType != Item.ItemType.medicine)
+        {
+            Debug.Log("Invalid medkit.");
+            return;
+        }
+        health += medkit.value;
+        if (health > 100)
+        {
+            health = 100;
+        }
+        if (selected)
+        {
+            Selected();
+        }
+    }
+
+    public void RefilMagazine()
+    {
+        Debug.Log("Refilling magazine in playable controler");
+        int ammo = baseControl.GetAllAmmoOfType(inventory.equipedItem.GetComponent<Gun>().magazine.magazineType.ToString());
+        int returnAmmo = 0;
+        if (ammo > 0)
+        {
+            returnAmmo = inventory.RefilMagazineAndReturn(ammo);
+        }
+        baseControl.SetAmmoOfTypeTo(inventory.equipedItem.GetComponent<Gun>().magazine.magazineType.ToString(), returnAmmo);
+        if (globalControl != null)
+        {
+            globalControl.Refiled();
+        }
+
+    }
+    
 }

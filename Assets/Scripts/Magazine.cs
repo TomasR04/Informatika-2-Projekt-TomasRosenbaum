@@ -52,11 +52,11 @@ namespace Assets.Scripts
         }
         private void Start()
         {
-            currentAmmo = capacity;
+            //currentAmmo = capacity;
         }
         private void Awake()
         {
-            currentAmmo = capacity;
+            //currentAmmo = capacity;
         }
 
     }

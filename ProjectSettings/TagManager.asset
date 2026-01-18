@@ -9,6 +9,7 @@ TagManager:
   - Enemy
   - Eliminated
   - Item
+  - Terrain
   layers:
   - Default
   - TransparentFX

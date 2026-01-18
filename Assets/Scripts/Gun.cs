@@ -10,7 +10,7 @@ namespace Assets.Scripts
     internal class Gun : Item
     {
         //public ItemType Type;
-        public string Name;
+        
         public Magazine magazine;
         public float range = 10f;
 

@@ -22,6 +22,9 @@ public class Player : MonoBehaviour
     bool shiftPressed = false;
 
     GameObject selectedObject;
+    public  GlobalControl globalControl;
+
+    public GameObject buildingObject;
 
     private void Start()
     {
@@ -33,7 +36,52 @@ public class Player : MonoBehaviour
         float deltaTime = Time.unscaledDeltaTime;
         UpdateMovement(deltaTime);
         UpdateOrbit(deltaTime);
+        if (buildingObject != null)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+            if (Physics.Raycast(ray, out RaycastHit hitInfo))
+            {
+                if (hitInfo.collider != null)
+                {
+                    Vector3 targetPosition = hitInfo.point;
+                    if (hitInfo.collider.gameObject.CompareTag("Terrain") && InsideBaseRadius(targetPosition))
+                    {
+                        
+                        buildingObject.transform.position = targetPosition;
+                    }
+                }
+            }
+            if (Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                // Finalize building placement
+                Debug.Log("Placed building: " + buildingObject.name + " at " + buildingObject.transform.position);
+                // remove from inventory
+                buildingObject.GetComponent<Collider>().enabled = true;
+                globalControl.baseControl.RemoveFromInventory(buildingObject);
+                buildingObject = null;
+                globalControl.constructedSomething = true;
+            }
+            if (Mouse.current.rightButton.wasPressedThisFrame)
+            {
+                // Cancel building placement
+                Debug.Log("Cancelled building placement: " + buildingObject.name);
+                GameObject.Destroy(buildingObject);
+                buildingObject = null;
+            }
+            if (Keyboard.current.rKey.wasPressedThisFrame)
+            {
+                // Rotate building
+                buildingObject.transform.Rotate(0, 90, 0);
+            }
+        }
 
+    }
+    bool InsideBaseRadius(Vector3 position)
+    {
+        Vector3 basePosition = globalControl.baseControl.transform.position;
+        float baseRadius = globalControl.baseControl.baseRadius;
+        float distance = Vector3.Distance(new Vector3(position.x, 0, position.z), new Vector3(basePosition.x, 0, basePosition.z));
+        return distance <= baseRadius;
     }
     private void OnMove(InputValue value)
     {
@@ -111,6 +159,10 @@ public class Player : MonoBehaviour
             }
         }
     }
+    void OnCancel(InputValue value)
+    {
+        globalControl.OnEsc();
+    }
 
     void UpdateMovement(float deltaTime)
     {
@@ -152,6 +204,16 @@ public class Player : MonoBehaviour
 
         cameraFollow.HorizontalAxis = horizontalAxis;
         cameraFollow.VerticalAxis = verticalAxis;
+
+
+    }
+
+    public void BuildThis(GameObject structurePrefab)
+    {
+        Debug.Log("Building structure: " + structurePrefab.name);
+        buildingObject = GameObject.Instantiate(structurePrefab);
+        buildingObject.GetComponent<MeshRenderer>().enabled = true;
+        buildingObject.GetComponent<Collider>().enabled = false;
 
 
     }

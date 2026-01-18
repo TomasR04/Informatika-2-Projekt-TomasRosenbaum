@@ -77,14 +77,15 @@ public class CharacterInventory : MonoBehaviour
     {
         
         Gun gun = equipedItem as Gun;
-        foreach (Item item in items)
+        List<Item> magazines = GetItemsOfType(Item.ItemType.magazine);
+        magazines.Add(equipedItem.gameObject.GetComponent<Gun>().magazine);
+        foreach (Item item in magazines)
         {
             Magazine mag = item as Magazine;
-            if (mag != null && mag.magazineType == gun.magazine.magazineType)
+            if (mag != null && mag.magazineType == gun.magazine.magazineType && mag.HasAmmo())
             {
                 gun.ReloadGun(mag);
-                items.Remove(mag);
-                Destroy(mag.gameObject);
+                mag.currentAmmo = 0;
                 break;
             }
         }
@@ -101,10 +102,12 @@ public class CharacterInventory : MonoBehaviour
         Gun gun = equipedItem as Gun;
         if (gun != null)
         {
-            foreach (Item item in items)
+            List<Item> magazines = GetItemsOfType(Item.ItemType.magazine);
+            magazines.Add(equipedItem.gameObject.GetComponent<Gun>().magazine);
+            foreach (Item item in magazines)
             {
                 Magazine mag = item as Magazine;
-                if (mag != null && mag.magazineType == gun.magazine.magazineType)
+                if (mag != null && mag.magazineType == gun.magazine.magazineType && mag.HasAmmo())
                 {
                     reloading?.Invoke();
                     
@@ -113,10 +116,94 @@ public class CharacterInventory : MonoBehaviour
             }
         }
     }
+    public List<Item> GetItemsOfType(Item.ItemType itemType)
+    {
+        List<Item> filteredItems = new List<Item>();
+        foreach (Item item in items)
+        {
+            if (item.itemType == itemType)
+            {
+                filteredItems.Add(item);
+            }
+        }
+        return filteredItems;
+    }
+    public void RefilMagazine(int availableAmmo)
+    {
+        int ammo = availableAmmo;
+        List<Magazine> magazines = new List<Magazine>();
+        foreach (Item item in items)
+        {
+            Magazine mag = item as Magazine;
+            if (mag != null)
+            {
+                magazines.Add(mag);
+            }
+        }
+        Magazine mostLowOnAmmo = magazines[0];
+        foreach (Magazine mag in magazines)
+        {
+            if (mag.currentAmmo < mostLowOnAmmo.currentAmmo)
+            {
+                mostLowOnAmmo = mag;
+            }
+        }
+        while (mostLowOnAmmo.Reload())
+        {
+            ammo--;
+        }
+    }
+
+    public int RefilMagazineAndReturn(int availableAmmo)
+    {
+        Debug.Log("RefilMagazineAndReturn called with availableAmmo: " + availableAmmo);
+        int ammo = availableAmmo;
+        List<Magazine> magazines = new List<Magazine>();
+        foreach (Item item in items)
+        {
+            Magazine mag = item as Magazine;
+            if (mag != null)
+            {
+                magazines.Add(mag);
+            }
+        }
+        Magazine mostLowOnAmmo = magazines[0];
+        foreach (Magazine mag in magazines)
+        {
+            if (mag.currentAmmo < mostLowOnAmmo.currentAmmo)
+            {
+                mostLowOnAmmo = mag;
+            }
+        }
+        while (mostLowOnAmmo.Reload())
+        {
+            ammo--;
+        }
+        return ammo;
+    }
 
     void Start()
     {
         playerController = GetComponent<PlayableControler>();
         CheckEquiped();
+    }
+    public string GetAmmoStatsInString()
+    {
+        Gun gun = equipedItem as Gun;
+        int totalAmmo = 0;
+        int totalCapacity = 0;
+        totalAmmo += gun.magazine.currentAmmo;
+        totalCapacity += gun.magazine.capacity;
+        foreach (Item item in items)
+        {
+            Magazine mag = item as Magazine;
+            if (mag != null && mag.magazineType == gun.magazine.magazineType)
+            {
+                totalAmmo += mag.currentAmmo;
+                totalCapacity += mag.capacity;
+            }
+        }
+        return $"{totalAmmo}/{totalCapacity}";
+
     }
 }
