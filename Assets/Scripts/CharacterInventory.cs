@@ -46,7 +46,22 @@ public class CharacterInventory : MonoBehaviour
     {
         if (HasItem(item))
         {
+
             equipedItem = item;
+            equipedItem.transform.SetParent(Hand.transform);
+            equipedItem.GetComponent<Renderer>().enabled = true;
+            Transform[] children = equipedItem.GetComponentsInChildren<Transform>();
+            foreach (Transform child in children)
+            {
+                if (child != equipedItem.transform)
+                {
+                    Renderer childRenderer = child.GetComponent<Renderer>();
+                    if (childRenderer != null)
+                    {
+                        childRenderer.enabled = true;
+                    }
+                }
+            }
         }
     }
     public void CheckEquiped()
@@ -59,7 +74,7 @@ public class CharacterInventory : MonoBehaviour
                 Gun gun = equipedItem as Gun;
                 if (gun != null)
                 {
-                    gun.OutOfAmmo += OnOutOfAmmo;
+                    gun.OutOfAmmo = OnOutOfAmmo;
                 }
             }
             else if (equipedItem.itemType == Item.ItemType.longWeapon)
@@ -68,9 +83,23 @@ public class CharacterInventory : MonoBehaviour
                 Gun gun = equipedItem as Gun;
                 if (gun != null)
                 {
-                    gun.OutOfAmmo += OnOutOfAmmo;
+                    //Debug.Log("Long");
+                    gun.OutOfAmmo = OnOutOfAmmo;
                 }
             }
+            else
+            {
+                playerController.animator.SetBool("HasShortGun", false);
+                playerController.animator.SetBool("HasLongGun", false);
+            }
+            equipedItem.transform.localPosition = equipedItem.handPosition;
+            equipedItem.transform.localRotation = Quaternion.Euler(equipedItem.handRotation);
+
+        }
+        else
+        {
+            playerController.animator.SetBool("HasShortGun", false);
+            playerController.animator.SetBool("HasLongGun", false);
         }
     }
     public void OnReloaded()
@@ -205,5 +234,49 @@ public class CharacterInventory : MonoBehaviour
         }
         return $"{totalAmmo}/{totalCapacity}";
 
+    }
+    public Item GetOneMagazine()
+    {
+        Gun gun = equipedItem as Gun;
+        foreach (Item item in items)
+        {
+            Magazine mag = item as Magazine;
+            if (mag != null && mag.magazineType == gun.magazine.magazineType)
+            {
+                items.Remove(item);
+                return item;
+            }
+        }
+        return null;
+    }
+    public GameObject ReturnItem(GameObject item)
+    {
+        foreach (Item invItem in items)
+        {
+            if (invItem.Name == item.GetComponent<Item>().Name)
+            {
+                items.Remove(invItem);
+                return invItem.gameObject;
+            }
+        }
+        return null;
+    }
+
+    public List<GameObject> ReturnAllMagazinesOfType(string type)
+    {
+        List<GameObject> mags = new List<GameObject>();
+        foreach (Item invItem in items)
+        {
+            Magazine mag = invItem as Magazine;
+            if (mag != null && mag.magazineType.ToString() == type)
+            {
+                mags.Add(invItem.gameObject);
+            }
+        }
+        foreach (GameObject mag in mags)
+        {
+            items.Remove(mag.GetComponent<Item>());
+        }
+        return mags;
     }
 }

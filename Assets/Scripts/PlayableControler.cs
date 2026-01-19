@@ -23,7 +23,7 @@ public class PlayableControler : MonoBehaviour
     public int health = 100;
     public int speed = 10;
     public int aiming = 10;
-    public int medicine = 10;
+    
     public bool canShoot = true;
     bool isReloading = false;
     public float stopRange = 5f;
@@ -70,20 +70,13 @@ public class PlayableControler : MonoBehaviour
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
-        charUI = GameObject.Find("CharacterUI");
+        //charUI = GameObject.Find("CharacterUI");
+        
         inventory = GetComponent<CharacterInventory>();
         inventory.reloading += OnReloading;
         inventory.reloadingDone += OnRealodingDone;
         //Debug.Log(charUI);
-        if (charUI != null)
-        {
-
-            charNameText = charUI.transform.Find("Name Text").GetComponent<TMPro.TextMeshProUGUI>();
-            healthText = charUI.transform.Find("Health Text").GetComponent<TMPro.TextMeshProUGUI>();
-            speedText = charUI.transform.Find("Speed Text").GetComponent<TMPro.TextMeshProUGUI>();
-            aimingText = charUI.transform.Find("Aim Text").GetComponent<TMPro.TextMeshProUGUI>();
-            medicineText = charUI.transform.Find("Med Text").GetComponent<TMPro.TextMeshProUGUI>();
-        }
+        
         CollectItems();
         if (baseControl == null)
         {
@@ -92,6 +85,16 @@ public class PlayableControler : MonoBehaviour
         if (globalControl == null)
         {
             globalControl = GameObject.Find("Global Control").GetComponent<GlobalControl>();
+        }
+        charUI = globalControl.charUI;
+        if (charUI != null)
+        {
+
+            charNameText = charUI.transform.Find("Name Text").GetComponent<TMPro.TextMeshProUGUI>();
+            healthText = charUI.transform.Find("Health Text").GetComponent<TMPro.TextMeshProUGUI>();
+            speedText = charUI.transform.Find("Speed Text").GetComponent<TMPro.TextMeshProUGUI>();
+            aimingText = charUI.transform.Find("Aim Text").GetComponent<TMPro.TextMeshProUGUI>();
+
         }
     }
 
@@ -167,6 +170,7 @@ public class PlayableControler : MonoBehaviour
                 {
                     animator.SetBool("HasLongGun", true);
                     animator.SetBool("HasShortGun", false);
+                    //Debug.Log("Using long weapon");
 
                 }
             }
@@ -273,7 +277,6 @@ public class PlayableControler : MonoBehaviour
         healthText.text = "Health: " + health.ToString();
         speedText.text = "Speed: " + speed.ToString();
         aimingText.text = "Aiming: " + aiming.ToString();
-        medicineText.text = "Medicine: " + medicine.ToString();
 
         charUI.SetActive(true);
         selected = true;
@@ -332,6 +335,7 @@ public class PlayableControler : MonoBehaviour
     }
     public void MoveTo(Vector3 destination)
     {
+
         destinationPoint = destination;
         agent.SetDestination(destinationPoint);
         animator.SetBool("Walk", true);
@@ -387,5 +391,24 @@ public class PlayableControler : MonoBehaviour
         }
 
     }
-    
+    public void PlaceOnNavMesh()
+    {
+        if (agent == null)
+            agent = GetComponent<NavMeshAgent>();
+
+        NavMeshHit hit;
+
+        // hledá NavMesh v okolí aktuální pozice
+        if (NavMesh.SamplePosition(transform.position, out hit, 5f, NavMesh.AllAreas))
+        {
+            agent.enabled = false;
+            transform.position = hit.position;
+            agent.enabled = true;
+        }
+        else
+        {
+            Debug.LogWarning($"{name} – nelze najít NavMesh poblíž pozice {transform.position}");
+        }
+    }
+
 }

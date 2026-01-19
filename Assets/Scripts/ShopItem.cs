@@ -22,41 +22,86 @@ public class ShopItem : MonoBehaviour
     }
     void Start()
     {
-        if (itemPrefab.GetComponent<Gun>()&&itemName == null)
+        if (itemPrefab.tag == "Item")
         {
-            itemName = itemPrefab.GetComponent<Gun>().Name;
+            if (itemPrefab.GetComponent<Gun>() && itemName == null)
+            {
+                itemName = itemPrefab.GetComponent<Gun>().Name;
 
+            }
+
+            gameObject.transform.Find("Name").GetComponent<TextMeshProUGUI>().text = itemName;
+            gameObject.transform.Find("Price").GetComponent<TextMeshProUGUI>().text = $"${itemPrice}";
+            if (itemIcon != null)
+                gameObject.transform.Find("Icon").GetComponent<UnityEngine.UI.Image>().sprite = itemIcon;
+            gameObject.transform.Find("Type").GetComponent<TextMeshProUGUI>().text = itemType.ToString();
+        }
+        else
+        {
+            gameObject.transform.Find("Name").GetComponent<TextMeshProUGUI>().text = "Nová postava";
+            gameObject.transform.Find("Price").GetComponent<TextMeshProUGUI>().text = $"${itemPrice}";
+            if (itemIcon != null)
+                gameObject.transform.Find("Icon").GetComponent<UnityEngine.UI.Image>().sprite = itemIcon;
+            gameObject.transform.Find("Type").GetComponent<TextMeshProUGUI>().text = "Character";
         }
         
-        gameObject.transform.Find("Name").GetComponent<TextMeshProUGUI>().text = itemName;
-        gameObject.transform.Find("Price").GetComponent<TextMeshProUGUI>().text = $"${itemPrice}";
-        if (itemIcon != null)
-            gameObject.transform.Find("Icon").GetComponent<UnityEngine.UI.Image>().sprite = itemIcon;
-        gameObject.transform.Find("Type").GetComponent<TextMeshProUGUI>().text = itemType.ToString();
     }
     /*public void OnPointerClick(PointerEventData eventData)
     {
         Debug.Log("Item clicked");
         BuyItem();
     }*/
-    
+
 
     public void BuyItem()
     {
-        
-        GlobalControl globalControl = GameObject.Find("Global Control").GetComponent<GlobalControl>();
-        if (globalControl.baseControl.money >= itemPrice)
+        if (itemPrefab.tag == "Item")
         {
-            globalControl.baseControl.money -= itemPrice;
-            GameObject newItem = Instantiate(itemPrefab);
-            globalControl.baseControl.AddToInventory(newItem);
-            globalControl.ShowTrader();
+            GlobalControl globalControl = GameObject.Find("Global Control").GetComponent<GlobalControl>();
+            if (globalControl.baseControl.money >= itemPrice)
+            {
+                globalControl.baseControl.money -= itemPrice;
+                GameObject newItem = Instantiate(itemPrefab);
+                globalControl.baseControl.AddToInventory(newItem);
+                globalControl.ShowTrader();
 
+            }
+            else
+            {
+                Debug.Log($"Not enough money to buy {itemName}. You need ${itemPrice - globalControl.baseControl.money} more.");
+            }
         }
         else
         {
-            Debug.Log($"Not enough money to buy {itemName}. You need ${itemPrice - globalControl.baseControl.money} more.");
+            GlobalControl globalControl = GameObject.Find("Global Control").GetComponent<GlobalControl>();
+            if (globalControl.baseControl.money >= itemPrice)
+            {
+                globalControl.baseControl.money -= itemPrice;
+
+                GameObject newCharacter = GetNewRandomCharacter();
+                globalControl.baseControl.AddCharacter(newCharacter);
+                newCharacter.GetComponent<PlayableControler>().PlaceOnNavMesh();
+                globalControl.ShowTrader();
+            }
+            else
+            {
+                Debug.Log($"Not enough money to buy {itemName}. You need ${itemPrice - globalControl.baseControl.money} more.");
+            }
+
         }
+    }
+    GameObject GetNewRandomCharacter()
+    {
+        string[] characterNames = { "Franta", "Pepa", "Pat", "Mat"};
+        string randomName = characterNames[Random.Range(0, characterNames.Length)];
+        int speed = Random.Range(5, 20);
+        int aim = Random.Range(5, 20);
+        GameObject newCharacter = Instantiate(itemPrefab);
+        newCharacter.GetComponent<PlayableControler>().speed = speed;
+        newCharacter.GetComponent<PlayableControler>().aiming = aim;
+
+        newCharacter.GetComponent<PlayableControler>().charName = randomName;
+        return newCharacter;
     }
 
 }

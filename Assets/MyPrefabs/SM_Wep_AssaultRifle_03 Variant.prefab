@@ -309,8 +309,8 @@ MonoBehaviour:
   value: 15
   Name: "Pu\u0161ka"
   itemType: 3
-  handPosition: {x: 0, y: 0, z: 0}
-  handRotation: {x: 0, y: 0, z: 0}
+  handPosition: {x: 0.129, y: 0.032, z: -0.037}
+  handRotation: {x: 0.297, y: 90.044, z: 268.451}
   magazine: {fileID: 1519538615944720152}
   range: 60
   fireDelay: 0.2

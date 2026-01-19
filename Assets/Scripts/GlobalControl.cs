@@ -34,6 +34,7 @@ public class GlobalControl : MonoBehaviour
     public GameObject buildUI;
     public List<GameObject> bulletsList = new List<GameObject>();
     public GameObject builderBTN;
+    public GameObject charUI;
 
     public bool constructedSomething = false;
 
@@ -270,7 +271,7 @@ public class GlobalControl : MonoBehaviour
                     
                 }
             }
-            Debug.Log("Closing UI: " + CurrentOpenUI.name);
+            //Debug.Log("Closing UI: " + CurrentOpenUI.name);
             CurrentOpenUI.SetActive(false);
             nextWaveButton.SetActive(true);
             traderBTN.SetActive(true);

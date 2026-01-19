@@ -10,6 +10,7 @@ TagManager:
   - Eliminated
   - Item
   - Terrain
+  - Structure
   layers:
   - Default
   - TransparentFX

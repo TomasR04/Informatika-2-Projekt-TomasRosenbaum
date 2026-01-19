@@ -53,7 +53,7 @@ public class ZombieSpawnArea : MonoBehaviour
             
         }
         globalControl.AddZombies(amount);
-        Debug.Log(gameObject.name + " wave spawned");
+        //Debug.Log(gameObject.name + " wave spawned");
 
     }
 }
