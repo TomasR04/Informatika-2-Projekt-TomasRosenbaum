@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class GlobalControl : MonoBehaviour
 {
@@ -84,7 +85,12 @@ public class GlobalControl : MonoBehaviour
         ShowBaseInventory();
         ShowPlayers();
         TextMeshProUGUI moneyTxT = traderUI.transform.Find("MoneyTXT").GetComponent<TextMeshProUGUI>();
-        moneyTxT.text = baseControl.money.ToString();       
+        moneyTxT.text = baseControl.money.ToString();   
+        ShopItem[] shopItems = traderUI.GetComponentsInChildren<ShopItem>();
+        foreach (var item in shopItems)
+        {
+            item.FixUI();
+        }
     }
     void ShowPlayers()
     {
@@ -278,6 +284,10 @@ public class GlobalControl : MonoBehaviour
             builderBTN.SetActive(true);
             CurrentOpenUI = null;
         }
+        else
+        {
+            SceneManager.LoadScene("Menu");
+        }
     }   
     public void CheckUI()
     {
@@ -307,6 +317,18 @@ public class GlobalControl : MonoBehaviour
         if (CurrentOpenUI == traderUI)
         {
             ShowTrader();
+        }
+    }
+    public void EndGame()
+    {
+           SceneManager.LoadScene("Menu");
+    }
+    public void DeleteDeadBodies() 
+    {         
+        GameObject[] deadBodies = GameObject.FindGameObjectsWithTag("Eliminated");
+        foreach (var body in deadBodies)
+        {
+            Destroy(body);
         }
     }
 }

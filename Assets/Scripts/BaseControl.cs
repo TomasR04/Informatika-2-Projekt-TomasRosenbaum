@@ -13,6 +13,7 @@ public class BaseControl : MonoBehaviour
     [SerializeField]
     private List<GameObject> baseInventory = new List<GameObject>();
     public List<GameObject> listOfGuns = new List<GameObject>();
+    public int characterLimit = 5;
 
 
     void Start()
@@ -130,6 +131,14 @@ public class BaseControl : MonoBehaviour
         }
         ReciveAmmoOfType(Type, amount);
 
+    }
+    public void RemoveCharacter(GameObject character)
+    {
+        characters.Remove(character);
+        if (characters.Count <=0)
+        {
+            globalControl.EndGame();
+        }
     }
 
     public Item GetMagazineOfType(string Type)

@@ -51,7 +51,32 @@ public class ShopItem : MonoBehaviour
         Debug.Log("Item clicked");
         BuyItem();
     }*/
+    public void FixUI()
+    {
+        Debug.Log("Fixing UI");
+        if (itemPrefab.tag == "Item")
+        {
+            if (itemPrefab.GetComponent<Gun>() && itemName == null)
+            {
+                itemName = itemPrefab.GetComponent<Gun>().Name;
 
+            }
+
+            gameObject.transform.Find("Name").GetComponent<TextMeshProUGUI>().text = itemName;
+            gameObject.transform.Find("Price").GetComponent<TextMeshProUGUI>().text = $"${itemPrice}";
+            if (itemIcon != null)
+                gameObject.transform.Find("Icon").GetComponent<UnityEngine.UI.Image>().sprite = itemIcon;
+            gameObject.transform.Find("Type").GetComponent<TextMeshProUGUI>().text = itemType.ToString();
+        }
+        else
+        {
+            gameObject.transform.Find("Name").GetComponent<TextMeshProUGUI>().text = "Nová postava";
+            gameObject.transform.Find("Price").GetComponent<TextMeshProUGUI>().text = $"${itemPrice}";
+            if (itemIcon != null)
+                gameObject.transform.Find("Icon").GetComponent<UnityEngine.UI.Image>().sprite = itemIcon;
+            gameObject.transform.Find("Type").GetComponent<TextMeshProUGUI>().text = "Character";
+        }
+    }
 
     public void BuyItem()
     {
@@ -74,7 +99,7 @@ public class ShopItem : MonoBehaviour
         else
         {
             GlobalControl globalControl = GameObject.Find("Global Control").GetComponent<GlobalControl>();
-            if (globalControl.baseControl.money >= itemPrice)
+            if (globalControl.baseControl.money >= itemPrice && globalControl.baseControl.characterLimit >= globalControl.baseControl.characters.Count +1)
             {
                 globalControl.baseControl.money -= itemPrice;
 
